@@ -1,42 +1,69 @@
-import socket
 import time
+import socket
 import threading
-import queue
+import os
 import io
+import queue
 from dataclasses import dataclass, field
 from typing import Dict, Optional
+
+# ============================================================
+# CONFIGURACIÓN
+# ============================================================
+MODO_DRON = True
+MODEL_PATH = "Modelo/yolo11n-pose.pt"
+
+# ---- DISTANCIAS ----
+DISTANCIA_IMPACTO = 100
+
+# ---- VELOCIDAD ----
+VELOCIDAD_MIN_GOLPE = 60
+FRAMES_MEMORIA = 5
+
+# ---- AGLOMERACIÓN ----
+UMBRAL_AGLOMERACION = 4
+SAVE_INTERVAL_AGLOMERACION = 15
+
+# ---- TIEMPOS ----
+SAVE_INTERVAL_PELEA = 10
+SAVE_INTERVAL_GOLPE = 2
+SAVE_INTERVAL_CAIDO = 8
+
+# ---- KEYPOINTS ----
+KP_CABEZA = 0
+KP_HOMBRO_IZQ = 5
+KP_HOMBRO_DER = 6
+KP_CADERA_IZQ = 11
+KP_CADERA_DER = 12
+KP_MUÑECA_IZQ = 9
+KP_MUÑECA_DER = 10
+
+WINDOW_NAME = "VANGUARDIA UCE"
+
+print(f"Iniciando Vanguardia UCE | Modo: {'DRON' if MODO_DRON else 'WEBCAM'}")
 
 import cv2
 import numpy as np
 from PIL import Image, ImageFile
+from ultralytics import YOLO
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # ============================================================
-# CONFIGURACIÓN
+# DRON CONFIG
 # ============================================================
 DRONE_IP = "192.168.28.1"
 DRONE_CMD_PORT = 7080
 LOCAL_VIDEO_PORT = 7070
 
-START_CAMERA_CMD = bytes.fromhex("cc 5a 01 82 02 36 b7")
-STOP_CAMERA_CMD = bytes.fromhex("cc 5a 01 82 02 37 b6")
+START_CMD = bytes.fromhex("cc 5a 01 82 02 36 b7")
+STOP_CMD = bytes.fromhex("cc 5a 01 82 02 37 b6")
 
 SOCKET_RCVBUF = 8 * 1024 * 1024
-FRAME_TIMEOUT_SECONDS = 0.20
-SHOW_EVERY_N_FRAMES = 2
 
-MIN_JPEG_SIZE = 8000
-MAX_JPEG_SIZE = 120000
-
-ROTATE_180 = True
-ROTATE_90_CLOCKWISE = False
-FLIP_HORIZONTAL = False
 
 # ============================================================
-# ESTRUCTURAS---------Prueba
-# ============================================================
-# ESTRUCTURAS
+# DECODER
 # ============================================================
 @dataclass
 class FrameAssembly:
@@ -49,20 +76,11 @@ class FrameAssembly:
     invalid: bool = False
 
 
-# ============================================================
-# DESOFUSCACIÓN DEL PAQUETE
-# ============================================================
 def deobfuscate_packet(packet: bytes, packet_len: int) -> bytes:
-    """
-    Basado en la lógica observada en s2.l:
-    data[index + 6] ^= 0xFF
-    donde index = (((data[0] * data[2]) + 10) * 6666) % (len - 8)
-    """
     if packet_len < 9:
         return packet[:packet_len]
 
     data = bytearray(packet[:packet_len])
-
     b0 = data[0] & 0xFF
     b2 = data[2] & 0xFF
 
@@ -79,56 +97,12 @@ def deobfuscate_packet(packet: bytes, packet_len: int) -> bytes:
     return bytes(data)
 
 
-# ============================================================
-# FUNCIÓN RESPONSIVE PARA LA VENTANA
-# ============================================================
-def resize_with_aspect_ratio(frame: np.ndarray, window_name: str) -> np.ndarray:
-    """
-    Ajusta el frame al tamaño actual de la ventana manteniendo proporción.
-    Si sobra espacio, rellena con negro.
-    """
-    try:
-        _, _, win_w, win_h = cv2.getWindowImageRect(window_name)
-    except cv2.error:
-        return frame
-
-    if win_w <= 1 or win_h <= 1:
-        return frame
-
-    h, w = frame.shape[:2]
-    if h <= 0 or w <= 0:
-        return frame
-
-    scale = min(win_w / w, win_h / h)
-    new_w = max(1, int(w * scale))
-    new_h = max(1, int(h * scale))
-
-    resized = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
-
-    canvas = np.zeros((win_h, win_w, 3), dtype=np.uint8)
-    x_offset = (win_w - new_w) // 2
-    y_offset = (win_h - new_h) // 2
-
-    canvas[y_offset:y_offset + new_h, x_offset:x_offset + new_w] = resized
-    return canvas
-
-
-# ============================================================
-# DECODIFICADOR ROBUSTO
-# ============================================================
 class RobustDroneDecoder:
     def __init__(self):
         self.lock = threading.Lock()
         self.frames: Dict[int, FrameAssembly] = {}
 
-        self.frame_counter = 0
-        self.good_frames = 0
-        self.bad_frames = 0
-        self.dropped_incomplete = 0
-        self.dropped_seq_gap = 0
-        self.dropped_decode = 0
-
-    def process_packet(self, raw_packet: bytes, packet_len: int) -> Optional[np.ndarray]:
+    def process_packet(self, raw_packet: bytes, packet_len: int):
         if packet_len < 5:
             return None
 
@@ -139,37 +113,22 @@ class RobustDroneDecoder:
         seq = int.from_bytes(packet[2:4], "little")
         payload = packet[4:packet_len]
 
-        if seq <= 0 or seq > 200:
-            return None
-
         with self.lock:
-            self._cleanup_expired_locked()
-
             frame = self.frames.get(frame_id)
 
             if seq == 1:
                 frame = FrameAssembly(frame_id=frame_id)
                 self.frames[frame_id] = frame
 
-            if frame is None:
-                return None
-
-            if frame.invalid:
-                return None
-
-            if seq < frame.expected_next_seq and seq != 1:
-                frame.invalid = True
-                self.dropped_seq_gap += 1
+            if frame is None or frame.invalid:
                 return None
 
             if seq != frame.expected_next_seq:
                 frame.invalid = True
-                self.dropped_seq_gap += 1
                 return None
 
             frame.parts[seq] = payload
             frame.expected_next_seq = seq + 1
-            frame.started_at = time.time()
 
             if flag == 0x01:
                 frame.last_seq = seq
@@ -178,226 +137,246 @@ class RobustDroneDecoder:
             if not frame.closed:
                 return None
 
-            if frame.last_seq is None:
-                frame.invalid = True
-                self.dropped_incomplete += 1
-                return None
-
-            for i in range(1, frame.last_seq + 1):
-                if i not in frame.parts:
-                    frame.invalid = True
-                    self.dropped_incomplete += 1
-                    return None
-
-            jpeg_bytes = self._build_jpeg(frame)
+            data = b"".join(frame.parts[i] for i in range(1, frame.last_seq + 1))
             del self.frames[frame_id]
-
-        if jpeg_bytes is None:
-            self.bad_frames += 1
-            return None
-
-        self.frame_counter += 1
-        if self.frame_counter % SHOW_EVERY_N_FRAMES != 0:
-            return None
-
-        img = self._decode_jpeg(jpeg_bytes)
-        if img is None:
-            self.bad_frames += 1
-            self.dropped_decode += 1
-            return None
-
-        img = self._postprocess(img)
-        self.good_frames += 1
-        return img
-
-    def _cleanup_expired_locked(self):
-        now = time.time()
-        expired = [
-            frame_id
-            for frame_id, frame in self.frames.items()
-            if now - frame.started_at > FRAME_TIMEOUT_SECONDS
-        ]
-        for frame_id in expired:
-            del self.frames[frame_id]
-            self.dropped_incomplete += 1
-
-    def _build_jpeg(self, frame: FrameAssembly) -> Optional[bytes]:
-        data = b"".join(frame.parts[i] for i in range(1, frame.last_seq + 1))
 
         soi = data.find(b"\xff\xd8")
         eoi = data.rfind(b"\xff\xd9")
 
-        if soi == -1 or eoi == -1 or eoi <= soi:
+        if soi == -1 or eoi == -1:
             return None
 
         jpeg = data[soi:eoi + 2]
+        img = cv2.imdecode(np.frombuffer(jpeg, dtype=np.uint8), cv2.IMREAD_COLOR)
 
-        if len(jpeg) < MIN_JPEG_SIZE or len(jpeg) > MAX_JPEG_SIZE:
-            return None
-        if not jpeg.startswith(b"\xff\xd8") or not jpeg.endswith(b"\xff\xd9"):
-            return None
+        return cv2.rotate(img, cv2.ROTATE_180)
 
-        return jpeg
-
-    def _decode_jpeg(self, jpeg: bytes) -> Optional[np.ndarray]:
-        arr = np.frombuffer(jpeg, dtype=np.uint8)
-        img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
-        if img is not None:
-            return img
-
-        try:
-            pil_img = Image.open(io.BytesIO(jpeg)).convert("RGB")
-            rgb = np.array(pil_img)
-            return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
-        except Exception:
-            return None
-
-    def _postprocess(self, img: np.ndarray) -> np.ndarray:
-        if ROTATE_180:
-            img = cv2.rotate(img, cv2.ROTATE_180)
-        if ROTATE_90_CLOCKWISE:
-            img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
-        if FLIP_HORIZONTAL:
-            img = cv2.flip(img, 1)
-        return img
-
-
-# ============================================================
-# CLIENTE UDP
-# ============================================================
-class DroneUDPClient:
-    def __init__(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, SOCKET_RCVBUF)
-        self.sock.bind(("0.0.0.0", LOCAL_VIDEO_PORT))
-        self.sock.settimeout(1.0)
-
-    def send_start_camera(self):
-        self.sock.sendto(START_CAMERA_CMD, (DRONE_IP, DRONE_CMD_PORT))
-
-    def send_stop_camera(self):
-        self.sock.sendto(STOP_CAMERA_CMD, (DRONE_IP, DRONE_CMD_PORT))
-
-    def recv_packet(self):
-        try:
-            return self.sock.recvfrom(1500)
-        except socket.timeout:
-            return None, None
-
-    def close(self):
-        try:
-            self.sock.close()
-        except Exception:
-            pass
 
 # ============================================================
 # APP
 # ============================================================
-class DroneVideoApp:
+class DroneVanguardIA:
     def __init__(self):
-        self.decoder = RobustDroneDecoder()
-        self.client = DroneUDPClient()
-
         self.running = True
-        self.last_good_frame: Optional[np.ndarray] = None
-        self.frame_queue: queue.Queue[np.ndarray] = queue.Queue(maxsize=1)
+        self.frame_queue = queue.Queue(maxsize=1)
 
-        self.recv_thread = threading.Thread(target=self._receiver_loop, daemon=True)
-        self.stats_thread = threading.Thread(target=self._stats_loop, daemon=True)
+        self.last_save_pelea = 0
+        self.last_save_golpe = 0
+        self.last_save_caido = 0
+        self.last_save_aglomeracion = 0
 
-        self.window_name = "Drone Video"
+        self.historial_manos = {}
 
-    def start(self):
-        print("Enviando comando de cámara...")
-        self.client.send_start_camera()
-        print("Esperando video...")
+        self.output_dir = "capturas"
+        os.makedirs(self.output_dir, exist_ok=True)
 
-        self.recv_thread.start()
-        self.stats_thread.start()
-        self._viewer_loop()
+        self.model = YOLO(MODEL_PATH)
 
-    def stop(self):
-        self.running = False
+        self.cap = None
+        if not MODO_DRON:
+            self.cap = cv2.VideoCapture(0)
+
+    # =========================
+    def distancia(self, p1, p2):
+        return np.linalg.norm(p1 - p2)
+
+    def punto_valido(self, p):
+        return p[0] > 0 and p[1] > 0
+
+    def calcular_velocidad(self, pid, mid, punto):
+        if pid not in self.historial_manos:
+            self.historial_manos[pid] = {}
+
+        if mid not in self.historial_manos[pid]:
+            self.historial_manos[pid][mid] = []
+
+        hist = self.historial_manos[pid][mid]
+        hist.append(punto)
+
+        if len(hist) > FRAMES_MEMORIA:
+            hist.pop(0)
+
+        if len(hist) >= 2:
+            return self.distancia(np.array(hist[-2]), np.array(hist[-1]))
+
+        return 0
+
+    # =========================
+    def detectar_eventos(self, coords, kpts):
+        eventos = []
+
+        # 🔵 AGLOMERACIÓN
+        if len(coords) >= UMBRAL_AGLOMERACION:
+            eventos.append("aglomeracion")
+
+        for i in range(len(coords)):
+            # 🟣 PERSONA CAÍDA
+            cabeza = kpts[i][KP_CABEZA]
+            cadera = (kpts[i][KP_CADERA_IZQ] + kpts[i][KP_CADERA_DER]) / 2
+
+            if self.punto_valido(cabeza) and self.punto_valido(cadera):
+                dy = abs(cabeza[1] - cadera[1])
+                dx = abs(cabeza[0] - cadera[0])
+
+                if dx > dy * 1.5:
+                    eventos.append("caido")
+
+        # 🔴 INTERACCIONES ENTRE PERSONAS
+        for i in range(len(coords)):
+            for j in range(i + 1, len(coords)):
+                cabeza_i = kpts[i][KP_CABEZA]
+                cabeza_j = kpts[j][KP_CABEZA]
+
+                manos_i = [
+                    (kpts[i][KP_MUÑECA_IZQ], "izq"),
+                    (kpts[i][KP_MUÑECA_DER], "der")
+                ]
+
+                manos_j = [
+                    (kpts[j][KP_MUÑECA_IZQ], "izq"),
+                    (kpts[j][KP_MUÑECA_DER], "der")
+                ]
+
+                for mano, tipo in manos_i:
+                    if self.punto_valido(mano) and self.punto_valido(cabeza_j):
+                        vel = self.calcular_velocidad(i, tipo, mano)
+                        dist = self.distancia(mano, cabeza_j)
+
+                        if vel > VELOCIDAD_MIN_GOLPE and dist < DISTANCIA_IMPACTO:
+                            eventos.append("golpe")
+                        elif dist < DISTANCIA_IMPACTO:
+                            eventos.append("pelea")
+
+                for mano, tipo in manos_j:
+                    if self.punto_valido(mano) and self.punto_valido(cabeza_i):
+                        vel = self.calcular_velocidad(j, tipo, mano)
+                        dist = self.distancia(mano, cabeza_i)
+
+                        if vel > VELOCIDAD_MIN_GOLPE and dist < DISTANCIA_IMPACTO:
+                            eventos.append("golpe")
+                        elif dist < DISTANCIA_IMPACTO:
+                            eventos.append("pelea")
+
+        return list(set(eventos))
+
+    # =========================
+    def ajustar_a_ventana(self, frame):
+        """
+        Redimensiona el frame al tamaño actual de la ventana,
+        manteniendo proporción.
+        """
         try:
-            self.client.send_stop_camera()
-        except Exception:
-            pass
-        self.client.close()
-        cv2.destroyAllWindows()
+            _, _, win_w, win_h = cv2.getWindowImageRect(WINDOW_NAME)
 
-    def _receiver_loop(self):
-        while self.running:
-            packet, addr = self.client.recv_packet()
-            if packet is None or addr is None:
-                continue
+            if win_w <= 0 or win_h <= 0:
+                return frame
 
-            ip, port = addr
-            if ip != DRONE_IP:
-                continue
-            if port != 7070:
-                continue
+            h, w = frame.shape[:2]
 
-            img = self.decoder.process_packet(packet, len(packet))
-            if img is None:
-                continue
+            scale = min(win_w / w, win_h / h)
+            new_w = max(1, int(w * scale))
+            new_h = max(1, int(h * scale))
 
-            try:
-                self.frame_queue.put_nowait(img)
-            except queue.Full:
+            resized = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
+            return resized
+        except:
+            return frame
+
+    # =========================
+    def video_receiver(self):
+        if MODO_DRON:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.bind(("0.0.0.0", LOCAL_VIDEO_PORT))
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, SOCKET_RCVBUF)
+            decoder = RobustDroneDecoder()
+            sock.sendto(START_CMD, (DRONE_IP, DRONE_CMD_PORT))
+
+            while self.running:
                 try:
-                    self.frame_queue.get_nowait()
-                except queue.Empty:
-                    pass
-                try:
-                    self.frame_queue.put_nowait(img)
-                except queue.Full:
-                    pass
+                    packet, addr = sock.recvfrom(2048)
+                    img = decoder.process_packet(packet, len(packet))
 
-    def _viewer_loop(self):
-        saved_count = 0
+                    if img is not None:
+                        if self.frame_queue.full():
+                            self.frame_queue.get()
+                        self.frame_queue.put(img)
+                except:
+                    continue
+        else:
+            while self.running:
+                ret, frame = self.cap.read()
+                if ret:
+                    if self.frame_queue.full():
+                        self.frame_queue.get()
+                    self.frame_queue.put(frame)
 
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.window_name, 960, 540)
+    # =========================
+    def run(self):
+        threading.Thread(target=self.video_receiver, daemon=True).start()
+
+        # Crear ventana redimensionable
+        cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow(WINDOW_NAME, 960, 720)
 
         while self.running:
             try:
-                img = self.frame_queue.get(timeout=1.0)
-                self.last_good_frame = img
-            except queue.Empty:
-                img = self.last_good_frame
-
-            if img is None:
+                frame = self.frame_queue.get(timeout=1)
+            except:
                 continue
 
-            display_img = resize_with_aspect_ratio(img, self.window_name)
-            cv2.imshow(self.window_name, display_img)
+            results = self.model.predict(frame, conf=0.5, imgsz=256, verbose=False)
 
-            key = cv2.waitKey(1) & 0xFF
+            for r in results:
+                annotated = r.plot()
 
-            if key == ord("q"):
-                self.stop()
+                if r.boxes is not None and r.keypoints is not None:
+                    coords = r.boxes.xyxy.cpu().numpy()
+                    kpts = r.keypoints.xy.cpu().numpy()
+
+                    eventos = self.detectar_eventos(coords, kpts)
+                    t = time.time()
+
+                    if "golpe" in eventos:
+                        cv2.putText(annotated, "PELEA", (50, 50), 0, 1, (0, 0, 255), 3)
+
+                        if t - self.last_save_golpe > SAVE_INTERVAL_GOLPE:
+                            cv2.imwrite(f"{self.output_dir}/golpe_{int(t)}.jpg", annotated)
+                            self.last_save_golpe = t
+
+                    if "pelea" in eventos:
+                        cv2.putText(annotated, "PELEA", (50, 100), 0, 1, (0, 255, 255), 2)
+
+                        if t - self.last_save_pelea > SAVE_INTERVAL_PELEA:
+                            cv2.imwrite(f"{self.output_dir}/pelea_{int(t)}.jpg", annotated)
+                            self.last_save_pelea = t
+
+                    if "caido" in eventos:
+                        cv2.putText(annotated, "PERSONA CAIDA", (50, 150), 0, 1, (255, 0, 255), 2)
+
+                        if t - self.last_save_caido > SAVE_INTERVAL_CAIDO:
+                            cv2.imwrite(f"{self.output_dir}/caido_{int(t)}.jpg", annotated)
+                            self.last_save_caido = t
+
+                    if "aglomeracion" in eventos:
+                        cv2.putText(annotated, "AGLOMERACION", (50, 200), 0, 1, (0, 255, 0), 2)
+
+                        if t - self.last_save_aglomeracion > SAVE_INTERVAL_AGLOMERACION:
+                            cv2.imwrite(f"{self.output_dir}/aglomeracion_{int(t)}.jpg", annotated)
+                            self.last_save_aglomeracion = t
+
+                frame_mostrar = self.ajustar_a_ventana(annotated)
+                cv2.imshow(WINDOW_NAME, frame_mostrar)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.running = False
                 break
-            elif key == ord("s"):
-                filename = f"frame_{saved_count:04d}.jpg"
-                cv2.imwrite(filename, img)
-                print(f"Captura guardada: {filename}")
-                saved_count += 1
 
-    def _stats_loop(self):
-        while self.running:
-            time.sleep(5)
-            print(
-                f"buenos={self.decoder.good_frames} | "
-                f"malos={self.decoder.bad_frames} | "
-                f"drop_incomplete={self.decoder.dropped_incomplete} | "
-                f"drop_seq_gap={self.decoder.dropped_seq_gap} | "
-                f"drop_decode={self.decoder.dropped_decode}"
-            )
+        if self.cap:
+            self.cap.release()
+
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    app = DroneVideoApp()
-    try:
-        app.start()
-    except KeyboardInterrupt:
-        app.stop()
+    app = DroneVanguardIA()
+    app.run()
