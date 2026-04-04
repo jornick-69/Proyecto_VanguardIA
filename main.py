@@ -20,18 +20,21 @@ DISTANCIA_IMPACTO = 100
 VELOCIDAD_MIN_GOLPE = 60
 FRAMES_MEMORIA = 5
 
-# ---- DESPLOME ----
-UMBRAL_HORIZONTAL = 1.3
-UMBRAL_MOVIMIENTO = 20
-TIEMPO_INMOVIL = 2.5
+# ---- AGLOMERACIÓN ----
+UMBRAL_AGLOMERACION = 4
+SAVE_INTERVAL_AGLOMERACION = 15
 
 # ---- TIEMPOS ----
 SAVE_INTERVAL_PELEA = 10
 SAVE_INTERVAL_GOLPE = 2
-SAVE_INTERVAL_CAIDA = 3
+SAVE_INTERVAL_CAIDO = 8
 
 # ---- KEYPOINTS ----
 KP_CABEZA = 0
+KP_HOMBRO_IZQ = 5
+KP_HOMBRO_DER = 6
+KP_CADERA_IZQ = 11
+KP_CADERA_DER = 12
 KP_MUÑECA_IZQ = 9
 KP_MUÑECA_DER = 10
 
@@ -141,83 +144,84 @@ class RobustDroneDecoder:
             return None
 
         jpeg = data[soi:eoi + 2]
-
         img = cv2.imdecode(np.frombuffer(jpeg, dtype=np.uint8), cv2.IMREAD_COLOR)
-
-        if img is None:
-            try:
-                pil_img = Image.open(io.BytesIO(jpeg)).convert("RGB")
-                img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-            except:
-                return None
 
         return cv2.rotate(img, cv2.ROTATE_180)
 
+
 # ============================================================
-# APP PRINCIPAL
+# APP
 # ============================================================
 class DroneVanguardIA:
     def __init__(self):
         self.running = True
         self.frame_queue = queue.Queue(maxsize=1)
-        self.window_name = "VANGUARDIA UCE"
 
-        # Guardado
         self.last_save_pelea = 0
         self.last_save_golpe = 0
-        self.last_save_caida = 0
+        self.last_save_caido = 0
+        self.last_save_aglomeracion = 0
+
+        self.historial_manos = {}
 
         self.output_dir = "capturas"
         os.makedirs(self.output_dir, exist_ok=True)
 
-        self.historial_manos = {}
-        self.historial_personas = {}
-
-        print("Cargando modelo YOLO...")
         self.model = YOLO(MODEL_PATH)
 
         self.cap = None
         if not MODO_DRON:
             self.cap = cv2.VideoCapture(0)
 
-    # ========================================================
-    # UTILIDADES
-    # ========================================================
+    # =========================
     def distancia(self, p1, p2):
         return np.linalg.norm(p1 - p2)
 
     def punto_valido(self, p):
         return p[0] > 0 and p[1] > 0
 
-    def calcular_velocidad(self, persona_id, mano_id, punto):
-        if persona_id not in self.historial_manos:
-            self.historial_manos[persona_id] = {}
+    def calcular_velocidad(self, pid, mid, punto):
+        if pid not in self.historial_manos:
+            self.historial_manos[pid] = {}
 
-        if mano_id not in self.historial_manos[persona_id]:
-            self.historial_manos[persona_id][mano_id] = []
+        if mid not in self.historial_manos[pid]:
+            self.historial_manos[pid][mid] = []
 
-        historial = self.historial_manos[persona_id][mano_id]
-        historial.append(punto)
+        hist = self.historial_manos[pid][mid]
+        hist.append(punto)
 
-        if len(historial) > FRAMES_MEMORIA:
-            historial.pop(0)
+        if len(hist) > FRAMES_MEMORIA:
+            hist.pop(0)
 
-        if len(historial) >= 2:
-            return self.distancia(np.array(historial[-2]), np.array(historial[-1]))
+        if len(hist) >= 2:
+            return self.distancia(np.array(hist[-2]), np.array(hist[-1]))
 
         return 0
 
-    # ========================================================
-    # DETECTOR PELEA / GOLPE
-    # ========================================================
+    # =========================
     def detectar_eventos(self, coords, kpts):
-        num_personas = len(coords)
+        eventos = []
 
-        if num_personas < 2:
-            return "none"
+        # 🔵 AGLOMERACIÓN
+        if len(coords) >= UMBRAL_AGLOMERACION:
+            eventos.append("aglomeracion")
 
-        for i in range(num_personas):
-            for j in range(i + 1, num_personas):
+        for i in range(len(coords)):
+
+            # 🟣 PERSONA CAÍDA
+            cabeza = kpts[i][KP_CABEZA]
+            cadera = (kpts[i][KP_CADERA_IZQ] + kpts[i][KP_CADERA_DER]) / 2
+
+            if self.punto_valido(cabeza) and self.punto_valido(cadera):
+                dy = abs(cabeza[1] - cadera[1])
+                dx = abs(cabeza[0] - cadera[0])
+
+                if dx > dy * 1.5:
+                    eventos.append("caido")
+
+        # 🔴 INTERACCIONES ENTRE PERSONAS
+        for i in range(len(coords)):
+            for j in range(i + 1, len(coords)):
 
                 cabeza_i = kpts[i][KP_CABEZA]
                 cabeza_j = kpts[j][KP_CABEZA]
@@ -228,121 +232,50 @@ class DroneVanguardIA:
                 manos_j = [(kpts[j][KP_MUÑECA_IZQ], "izq"),
                            (kpts[j][KP_MUÑECA_DER], "der")]
 
-                # GOLPE
                 for mano, tipo in manos_i:
                     if self.punto_valido(mano) and self.punto_valido(cabeza_j):
+
                         vel = self.calcular_velocidad(i, tipo, mano)
                         dist = self.distancia(mano, cabeza_j)
 
                         if vel > VELOCIDAD_MIN_GOLPE and dist < DISTANCIA_IMPACTO:
-                            return "golpe"
+                            eventos.append("golpe")
 
-                for mano, tipo in manos_j:
-                    if self.punto_valido(mano) and self.punto_valido(cabeza_i):
-                        vel = self.calcular_velocidad(j, tipo, mano)
-                        dist = self.distancia(mano, cabeza_i)
+                        elif dist < DISTANCIA_IMPACTO:
+                            eventos.append("pelea")
 
-                        if vel > VELOCIDAD_MIN_GOLPE and dist < DISTANCIA_IMPACTO:
-                            return "golpe"
+        return list(set(eventos))
 
-                # PELEA
-                for mano, _ in manos_i:
-                    if self.punto_valido(mano) and self.punto_valido(cabeza_j):
-                        if self.distancia(mano, cabeza_j) < DISTANCIA_IMPACTO:
-                            return "pelea"
-
-                for mano, _ in manos_j:
-                    if self.punto_valido(mano) and self.punto_valido(cabeza_i):
-                        if self.distancia(mano, cabeza_i) < DISTANCIA_IMPACTO:
-                            return "pelea"
-
-        return "none"
-
-    # ========================================================
-    # DETECTOR DESPLOME
-    # ========================================================
-    def detectar_desplome(self, coords):
-        tiempo_actual = time.time()
-
-        for i in range(len(coords)):
-            x1, y1, x2, y2 = coords[i]
-
-            ancho = x2 - x1
-            alto = y2 - y1
-
-            centro = np.array([(x1 + x2) / 2, (y1 + y2) / 2])
-            horizontal = ancho > alto * UMBRAL_HORIZONTAL
-
-            if i not in self.historial_personas:
-                self.historial_personas[i] = {"pos": centro, "time": tiempo_actual}
-                continue
-
-            prev = self.historial_personas[i]
-            movimiento = np.linalg.norm(centro - prev["pos"])
-
-            if movimiento > UMBRAL_MOVIMIENTO:
-                self.historial_personas[i] = {"pos": centro, "time": tiempo_actual}
-                continue
-
-            tiempo_quieto = tiempo_actual - prev["time"]
-
-            if horizontal and tiempo_quieto > TIEMPO_INMOVIL:
-                return True
-
-        return False
-
-    # ========================================================
-    # CAPTURA
-    # ========================================================
+    # =========================
     def video_receiver(self):
         if MODO_DRON:
-            print("📡 DRON activo")
-
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.bind(("0.0.0.0", LOCAL_VIDEO_PORT))
-
             decoder = RobustDroneDecoder()
             sock.sendto(START_CMD, (DRONE_IP, DRONE_CMD_PORT))
 
             while self.running:
                 try:
                     packet, addr = sock.recvfrom(2048)
-                    if addr[0] != DRONE_IP:
-                        continue
-
                     img = decoder.process_packet(packet, len(packet))
 
                     if img is not None:
-                        try:
-                            self.frame_queue.put_nowait(img)
-                        except queue.Full:
-                            self.frame_queue.get_nowait()
-                            self.frame_queue.put_nowait(img)
+                        if self.frame_queue.full():
+                            self.frame_queue.get()
+                        self.frame_queue.put(img)
                 except:
                     continue
-
-            sock.sendto(STOP_CMD, (DRONE_IP, DRONE_CMD_PORT))
-            sock.close()
-
         else:
-            print("📷 Webcam activa")
-
             while self.running:
                 ret, frame = self.cap.read()
                 if ret:
-                    try:
-                        self.frame_queue.put_nowait(frame)
-                    except queue.Full:
-                        self.frame_queue.get_nowait()
-                        self.frame_queue.put_nowait(frame)
+                    if self.frame_queue.full():
+                        self.frame_queue.get()
+                    self.frame_queue.put(frame)
 
-    # ========================================================
-    # MAIN LOOP
-    # ========================================================
+    # =========================
     def run(self):
         threading.Thread(target=self.video_receiver, daemon=True).start()
-
-        cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
 
         while self.running:
             try:
@@ -354,46 +287,43 @@ class DroneVanguardIA:
 
             for r in results:
                 annotated = r.plot()
-                evento = "none"
-                desplome = False
 
                 if r.boxes is not None and r.keypoints is not None:
                     coords = r.boxes.xyxy.cpu().numpy()
                     kpts = r.keypoints.xy.cpu().numpy()
 
-                    evento = self.detectar_eventos(coords, kpts)
-                    desplome = self.detectar_desplome(coords)
+                    eventos = self.detectar_eventos(coords, kpts)
+                    t = time.time()
 
-                t = time.time()
+                    if "golpe" in eventos:
+                        cv2.putText(annotated, "GOLPE", (50, 50), 0, 1, (0,0,255), 3)
 
-                if evento == "golpe":
-                    cv2.putText(annotated, "GOLPE DETECTADO", (50, 50),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+                        if t - self.last_save_golpe > SAVE_INTERVAL_GOLPE:
+                            cv2.imwrite(f"{self.output_dir}/golpe_{int(t)}.jpg", annotated)
+                            self.last_save_golpe = t
 
-                    if t - self.last_save_golpe >= SAVE_INTERVAL_GOLPE:
-                        filename = os.path.join(self.output_dir, f"golpe_{int(t)}.jpg")
-                        cv2.imwrite(filename, annotated)
-                        self.last_save_golpe = t
+                    if "pelea" in eventos:
+                        cv2.putText(annotated, "PELEA", (50, 100), 0, 1, (0,255,255), 2)
 
-                elif evento == "pelea":
-                    cv2.putText(annotated, "POSIBLE PELEA", (50, 50),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+                        if t - self.last_save_pelea > SAVE_INTERVAL_PELEA:
+                            cv2.imwrite(f"{self.output_dir}/pelea_{int(t)}.jpg", annotated)
+                            self.last_save_pelea = t
 
-                    if t - self.last_save_pelea >= SAVE_INTERVAL_PELEA:
-                        filename = os.path.join(self.output_dir, f"pelea_{int(t)}.jpg")
-                        cv2.imwrite(filename, annotated)
-                        self.last_save_pelea = t
+                    if "caido" in eventos:
+                        cv2.putText(annotated, "PERSONA CAIDA", (50, 150), 0, 1, (255,0,255), 2)
 
-                elif desplome:
-                    cv2.putText(annotated, "PERSONA DESPLOMADA", (50, 100),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
+                        if t - self.last_save_caido > SAVE_INTERVAL_CAIDO:
+                            cv2.imwrite(f"{self.output_dir}/caido_{int(t)}.jpg", annotated)
+                            self.last_save_caido = t
 
-                    if t - self.last_save_caida >= SAVE_INTERVAL_CAIDA:
-                        filename = os.path.join(self.output_dir, f"desplome_{int(t)}.jpg")
-                        cv2.imwrite(filename, annotated)
-                        self.last_save_caida = t
+                    if "aglomeracion" in eventos:
+                        cv2.putText(annotated, "AGLOMERACION", (50, 200), 0, 1, (0,255,0), 2)
 
-                cv2.imshow(self.window_name, annotated)
+                        if t - self.last_save_aglomeracion > SAVE_INTERVAL_AGLOMERACION:
+                            cv2.imwrite(f"{self.output_dir}/aglomeracion_{int(t)}.jpg", annotated)
+                            self.last_save_aglomeracion = t
+
+                cv2.imshow("VANGUARDIA UCE", annotated)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False
@@ -405,9 +335,6 @@ class DroneVanguardIA:
         cv2.destroyAllWindows()
 
 
-# ============================================================
-# RUN
-# ============================================================
 if __name__ == "__main__":
     app = DroneVanguardIA()
     app.run()
