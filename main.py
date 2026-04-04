@@ -3,7 +3,6 @@ import socket
 import threading
 import os
 import io
-import sys
 import queue
 from dataclasses import dataclass, field
 from typing import Dict, Optional
@@ -11,136 +10,27 @@ from typing import Dict, Optional
 # ============================================================
 # CONFIGURACIÓN
 # ============================================================
-MODO_DRON = False  # True = Drone | False = Webcam
-#MODEL_PATH = r"C:\Users\elvis\Downloads\yolo11n-pose.pt"
+MODO_DRON = False
 MODEL_PATH = "Modelo/yolo11n-pose.pt"
+
+# ---- DETECCIÓN ----
+DISTANCIA_PERSONAS = 250
+DISTANCIA_MANO_CABEZA = 120
+SAVE_INTERVAL = 5
+
+# ---- KEYPOINTS ----
+KP_CABEZA = 0
+KP_MUÑECA_IZQ = 9
+KP_MUÑECA_DER = 10
 
 print(f"Iniciando Vanguardia UCE | Modo: {'DRON' if MODO_DRON else 'WEBCAM'}")
 
 import cv2
 import numpy as np
 from PIL import Image, ImageFile
-
-os.environ["YOLO_VERBOSE"] = "False"
-os.environ["YOLO_OFFLINE"] = "True"
-
 from ultralytics import YOLO
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-
-# ============================================================
-# DRON CONFIG
-# ============================================================
-DRONE_IP = "192.168.28.1"
-DRONE_CMD_PORT = 7080
-LOCAL_VIDEO_PORT = 7070
-
-START_CMD = bytes.fromhex("cc 5a 01 82 02 36 b7")
-STOP_CMD = bytes.fromhex("cc 5a 01 82 02 37 b6")
-
-SOCKET_RCVBUF = 8 * 1024 * 1024
-
-# ============================================================
-# DECODER (EL QUE SÍ FUNCIONA)
-# ============================================================
-@dataclass
-class FrameAssembly:
-    frame_id: int
-    started_at: float = field(default_factory=time.time)
-    parts: Dict[int, bytes] = field(default_factory=dict)
-    expected_next_seq: int = 1
-    last_seq: Optional[int] = None
-    closed: bool = False
-    invalid: bool = False
-
-
-def deobfuscate_packet(packet: bytes, packet_len: int) -> bytes:
-    if packet_len < 9:
-        return packet[:packet_len]
-
-    data = bytearray(packet[:packet_len])
-
-    b0 = data[0] & 0xFF
-    b2 = data[2] & 0xFF
-
-    denom = packet_len - 8
-    if denom <= 0:
-        return bytes(data)
-
-    idx = (((b0 * b2) + 10) * 6666) % denom
-    target = idx + 6
-
-    if 0 <= target < packet_len:
-        data[target] ^= 0xFF
-
-    return bytes(data)
-
-
-class RobustDroneDecoder:
-    def __init__(self):
-        self.lock = threading.Lock()
-        self.frames: Dict[int, FrameAssembly] = {}
-
-    def process_packet(self, raw_packet: bytes, packet_len: int) -> Optional[np.ndarray]:
-        if packet_len < 5:
-            return None
-
-        packet = deobfuscate_packet(raw_packet, packet_len)
-
-        frame_id = packet[0]
-        flag = packet[1]
-        seq = int.from_bytes(packet[2:4], "little")
-        payload = packet[4:packet_len]
-
-        if seq <= 0 or seq > 200:
-            return None
-
-        with self.lock:
-            frame = self.frames.get(frame_id)
-
-            if seq == 1:
-                frame = FrameAssembly(frame_id=frame_id)
-                self.frames[frame_id] = frame
-
-            if frame is None or frame.invalid:
-                return None
-
-            if seq != frame.expected_next_seq:
-                frame.invalid = True
-                return None
-
-            frame.parts[seq] = payload
-            frame.expected_next_seq = seq + 1
-
-            if flag == 0x01:
-                frame.last_seq = seq
-                frame.closed = True
-
-            if not frame.closed:
-                return None
-
-            data = b"".join(frame.parts[i] for i in range(1, frame.last_seq + 1))
-            del self.frames[frame_id]
-
-        soi = data.find(b"\xff\xd8")
-        eoi = data.rfind(b"\xff\xd9")
-
-        if soi == -1 or eoi == -1:
-            return None
-
-        jpeg = data[soi:eoi + 2]
-
-        img = cv2.imdecode(np.frombuffer(jpeg, dtype=np.uint8), cv2.IMREAD_COLOR)
-
-        if img is None:
-            try:
-                pil_img = Image.open(io.BytesIO(jpeg)).convert("RGB")
-                img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-            except:
-                return None
-
-        return cv2.rotate(img, cv2.ROTATE_180)
-
 
 # ============================================================
 # APP PRINCIPAL
@@ -152,6 +42,11 @@ class DroneVanguardIA:
 
         self.window_name = "VANGUARDIA UCE"
 
+        self.last_save_time = 0
+
+        self.output_dir = "capturas"
+        os.makedirs(self.output_dir, exist_ok=True)
+
         print("Cargando modelo YOLO...")
         self.model = YOLO(MODEL_PATH)
 
@@ -159,63 +54,78 @@ class DroneVanguardIA:
             self.cap = cv2.VideoCapture(0)
 
     # ========================================================
-    # HILO CAPTURA
+    # UTILIDADES
     # ========================================================
-    def video_receiver(self):
-        if MODO_DRON:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, SOCKET_RCVBUF)
-            sock.bind(("0.0.0.0", LOCAL_VIDEO_PORT))
+    def distancia(self, p1, p2):
+        return np.linalg.norm(p1 - p2)
 
-            decoder = RobustDroneDecoder()
+    def punto_valido(self, p):
+        return p[0] > 0 and p[1] > 0
 
-            sock.sendto(START_CMD, (DRONE_IP, DRONE_CMD_PORT))
-            print("📡 Dron conectado")
+    # ========================================================
+    # DETECCIÓN DE CONFLICTO
+    # ========================================================
+    def detectar_conflicto(self, coords, kpts):
+        num_personas = len(coords)
 
-            while self.running:
-                try:
-                    packet, addr = sock.recvfrom(2048)
-                    ip, port = addr
+        if num_personas < 2:
+            return False
 
-                    if ip != DRONE_IP or port != 7070:
+        for i in range(num_personas):
+            for j in range(i + 1, num_personas):
+
+                # centros
+                c1 = np.array([(coords[i][0]+coords[i][2])/2,
+                               (coords[i][1]+coords[i][3])/2])
+
+                c2 = np.array([(coords[j][0]+coords[j][2])/2,
+                               (coords[j][1]+coords[j][3])/2])
+
+                if self.distancia(c1, c2) < DISTANCIA_PERSONAS:
+
+                    cabeza_i = kpts[i][KP_CABEZA]
+                    cabeza_j = kpts[j][KP_CABEZA]
+
+                    manos_i = [kpts[i][KP_MUÑECA_IZQ], kpts[i][KP_MUÑECA_DER]]
+                    manos_j = [kpts[j][KP_MUÑECA_IZQ], kpts[j][KP_MUÑECA_DER]]
+
+                    # validar puntos
+                    if not (self.punto_valido(cabeza_i) and self.punto_valido(cabeza_j)):
                         continue
 
-                    img = decoder.process_packet(packet, len(packet))
+                    for mano in manos_i:
+                        if self.punto_valido(mano):
+                            if self.distancia(mano, cabeza_j) < DISTANCIA_MANO_CABEZA:
+                                return True
 
-                    if img is not None:
-                        try:
-                            self.frame_queue.put_nowait(img)
-                        except queue.Full:
-                            self.frame_queue.get_nowait()
-                            self.frame_queue.put_nowait(img)
+                    for mano in manos_j:
+                        if self.punto_valido(mano):
+                            if self.distancia(mano, cabeza_i) < DISTANCIA_MANO_CABEZA:
+                                return True
 
-                except:
-                    continue
-
-            sock.sendto(STOP_CMD, (DRONE_IP, DRONE_CMD_PORT))
-            sock.close()
-
-        else:
-            print("📷 Webcam activa")
-            while self.running:
-                ret, frame = self.cap.read()
-                if ret:
-                    try:
-                        self.frame_queue.put_nowait(frame)
-                    except queue.Full:
-                        self.frame_queue.get_nowait()
-                        self.frame_queue.put_nowait(frame)
+        return False
 
     # ========================================================
-    # MAIN LOOP (IA + DISPLAY)
+    # CAPTURA
+    # ========================================================
+    def video_receiver(self):
+        print("📷 Webcam activa")
+        while self.running:
+            ret, frame = self.cap.read()
+            if ret:
+                try:
+                    self.frame_queue.put_nowait(frame)
+                except queue.Full:
+                    self.frame_queue.get_nowait()
+                    self.frame_queue.put_nowait(frame)
+
+    # ========================================================
+    # MAIN LOOP
     # ========================================================
     def run(self):
         threading.Thread(target=self.video_receiver, daemon=True).start()
 
         cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.window_name, 960, 540)
-
-        print("Presiona 'q' para salir")
 
         while self.running:
             try:
@@ -223,17 +133,43 @@ class DroneVanguardIA:
             except:
                 continue
 
-            # IA
             results = self.model.predict(frame, conf=0.5, imgsz=256, verbose=False)
 
             for r in results:
                 annotated = r.plot()
 
-                count = len(r.boxes)
-                if count >= 2:
-                    cv2.putText(annotated, "ALERTA CONFLICTO",
+                conflicto = False
+
+                if r.boxes is not None and r.keypoints is not None:
+                    coords = r.boxes.xyxy.cpu().numpy()
+                    kpts = r.keypoints.xy.cpu().numpy()
+
+                    # DEBUG: dibujar keypoints
+                    for persona in kpts:
+                        for punto in persona:
+                            x, y = int(punto[0]), int(punto[1])
+                            if x > 0 and y > 0:
+                                cv2.circle(annotated, (x, y), 4, (0,255,0), -1)
+
+                    conflicto = self.detectar_conflicto(coords, kpts)
+
+                if conflicto:
+                    cv2.putText(annotated, "POSIBLE PELEA",
                                 (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
-                                1, (0, 0, 255), 2)
+                                1, (0, 0, 255), 3)
+
+                    current_time = time.time()
+
+                    if current_time - self.last_save_time >= SAVE_INTERVAL:
+                        filename = os.path.join(
+                            self.output_dir,
+                            f"pelea_{int(current_time)}.jpg"
+                        )
+
+                        cv2.imwrite(filename, annotated)
+                        print(f"📸 Pelea detectada: {filename}")
+
+                        self.last_save_time = current_time
 
                 cv2.imshow(self.window_name, annotated)
 
@@ -241,11 +177,8 @@ class DroneVanguardIA:
                 self.running = False
                 break
 
-        if not MODO_DRON:
-            self.cap.release()
-
+        self.cap.release()
         cv2.destroyAllWindows()
-        print("Finalizado")
 
 
 # ============================================================
