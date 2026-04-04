@@ -10,7 +10,7 @@ from typing import Dict, Optional
 # ============================================================
 # CONFIGURACIÓN
 # ============================================================
-MODO_DRON = False
+MODO_DRON = True
 MODEL_PATH = "Modelo/yolo11n-pose.pt"
 
 # ---- DISTANCIAS ----
@@ -37,6 +37,8 @@ KP_CADERA_IZQ = 11
 KP_CADERA_DER = 12
 KP_MUÑECA_IZQ = 9
 KP_MUÑECA_DER = 10
+
+WINDOW_NAME = "VANGUARDIA UCE"
 
 print(f"Iniciando Vanguardia UCE | Modo: {'DRON' if MODO_DRON else 'WEBCAM'}")
 
@@ -207,7 +209,6 @@ class DroneVanguardIA:
             eventos.append("aglomeracion")
 
         for i in range(len(coords)):
-
             # 🟣 PERSONA CAÍDA
             cabeza = kpts[i][KP_CABEZA]
             cadera = (kpts[i][KP_CADERA_IZQ] + kpts[i][KP_CADERA_DER]) / 2
@@ -222,35 +223,70 @@ class DroneVanguardIA:
         # 🔴 INTERACCIONES ENTRE PERSONAS
         for i in range(len(coords)):
             for j in range(i + 1, len(coords)):
-
                 cabeza_i = kpts[i][KP_CABEZA]
                 cabeza_j = kpts[j][KP_CABEZA]
 
-                manos_i = [(kpts[i][KP_MUÑECA_IZQ], "izq"),
-                           (kpts[i][KP_MUÑECA_DER], "der")]
+                manos_i = [
+                    (kpts[i][KP_MUÑECA_IZQ], "izq"),
+                    (kpts[i][KP_MUÑECA_DER], "der")
+                ]
 
-                manos_j = [(kpts[j][KP_MUÑECA_IZQ], "izq"),
-                           (kpts[j][KP_MUÑECA_DER], "der")]
+                manos_j = [
+                    (kpts[j][KP_MUÑECA_IZQ], "izq"),
+                    (kpts[j][KP_MUÑECA_DER], "der")
+                ]
 
                 for mano, tipo in manos_i:
                     if self.punto_valido(mano) and self.punto_valido(cabeza_j):
-
                         vel = self.calcular_velocidad(i, tipo, mano)
                         dist = self.distancia(mano, cabeza_j)
 
                         if vel > VELOCIDAD_MIN_GOLPE and dist < DISTANCIA_IMPACTO:
                             eventos.append("golpe")
+                        elif dist < DISTANCIA_IMPACTO:
+                            eventos.append("pelea")
 
+                for mano, tipo in manos_j:
+                    if self.punto_valido(mano) and self.punto_valido(cabeza_i):
+                        vel = self.calcular_velocidad(j, tipo, mano)
+                        dist = self.distancia(mano, cabeza_i)
+
+                        if vel > VELOCIDAD_MIN_GOLPE and dist < DISTANCIA_IMPACTO:
+                            eventos.append("golpe")
                         elif dist < DISTANCIA_IMPACTO:
                             eventos.append("pelea")
 
         return list(set(eventos))
 
     # =========================
+    def ajustar_a_ventana(self, frame):
+        """
+        Redimensiona el frame al tamaño actual de la ventana,
+        manteniendo proporción.
+        """
+        try:
+            _, _, win_w, win_h = cv2.getWindowImageRect(WINDOW_NAME)
+
+            if win_w <= 0 or win_h <= 0:
+                return frame
+
+            h, w = frame.shape[:2]
+
+            scale = min(win_w / w, win_h / h)
+            new_w = max(1, int(w * scale))
+            new_h = max(1, int(h * scale))
+
+            resized = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
+            return resized
+        except:
+            return frame
+
+    # =========================
     def video_receiver(self):
         if MODO_DRON:
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.bind(("0.0.0.0", LOCAL_VIDEO_PORT))
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, SOCKET_RCVBUF)
             decoder = RobustDroneDecoder()
             sock.sendto(START_CMD, (DRONE_IP, DRONE_CMD_PORT))
 
@@ -277,6 +313,10 @@ class DroneVanguardIA:
     def run(self):
         threading.Thread(target=self.video_receiver, daemon=True).start()
 
+        # Crear ventana redimensionable
+        cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+        cv2.resizeWindow(WINDOW_NAME, 960, 720)
+
         while self.running:
             try:
                 frame = self.frame_queue.get(timeout=1)
@@ -296,34 +336,35 @@ class DroneVanguardIA:
                     t = time.time()
 
                     if "golpe" in eventos:
-                        cv2.putText(annotated, "PELEA", (50, 50), 0, 1, (0,0,255), 3)
+                        cv2.putText(annotated, "PELEA", (50, 50), 0, 1, (0, 0, 255), 3)
 
                         if t - self.last_save_golpe > SAVE_INTERVAL_GOLPE:
                             cv2.imwrite(f"{self.output_dir}/golpe_{int(t)}.jpg", annotated)
                             self.last_save_golpe = t
 
                     if "pelea" in eventos:
-                        cv2.putText(annotated, "PELEA", (50, 100), 0, 1, (0,255,255), 2)
+                        cv2.putText(annotated, "PELEA", (50, 100), 0, 1, (0, 255, 255), 2)
 
                         if t - self.last_save_pelea > SAVE_INTERVAL_PELEA:
                             cv2.imwrite(f"{self.output_dir}/pelea_{int(t)}.jpg", annotated)
                             self.last_save_pelea = t
 
                     if "caido" in eventos:
-                        cv2.putText(annotated, "PERSONA CAIDA", (50, 150), 0, 1, (255,0,255), 2)
+                        cv2.putText(annotated, "PERSONA CAIDA", (50, 150), 0, 1, (255, 0, 255), 2)
 
                         if t - self.last_save_caido > SAVE_INTERVAL_CAIDO:
                             cv2.imwrite(f"{self.output_dir}/caido_{int(t)}.jpg", annotated)
                             self.last_save_caido = t
 
                     if "aglomeracion" in eventos:
-                        cv2.putText(annotated, "AGLOMERACION", (50, 200), 0, 1, (0,255,0), 2)
+                        cv2.putText(annotated, "AGLOMERACION", (50, 200), 0, 1, (0, 255, 0), 2)
 
                         if t - self.last_save_aglomeracion > SAVE_INTERVAL_AGLOMERACION:
                             cv2.imwrite(f"{self.output_dir}/aglomeracion_{int(t)}.jpg", annotated)
                             self.last_save_aglomeracion = t
 
-                cv2.imshow("VANGUARDIA UCE", annotated)
+                frame_mostrar = self.ajustar_a_ventana(annotated)
+                cv2.imshow(WINDOW_NAME, frame_mostrar)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.running = False
