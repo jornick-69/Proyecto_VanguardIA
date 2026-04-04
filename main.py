@@ -296,7 +296,7 @@ class DroneVanguardIA:
                     t = time.time()
 
                     if "golpe" in eventos:
-                        cv2.putText(annotated, "GOLPE", (50, 50), 0, 1, (0,0,255), 3)
+                        cv2.putText(annotated, "PELEA", (50, 50), 0, 1, (0,0,255), 3)
 
                         if t - self.last_save_golpe > SAVE_INTERVAL_GOLPE:
                             cv2.imwrite(f"{self.output_dir}/golpe_{int(t)}.jpg", annotated)
