@@ -13,12 +13,17 @@ from typing import Dict, Optional
 MODO_DRON = True
 MODEL_PATH = "Modelo/yolo11n-pose.pt"
 
-# ---- DETECCIÓN PRO ----
+# ---- DISTANCIAS ----
 DISTANCIA_PERSONAS = 250
 DISTANCIA_IMPACTO = 100
+
+# ---- VELOCIDAD ----
 VELOCIDAD_MIN_GOLPE = 60
 FRAMES_MEMORIA = 5
-SAVE_INTERVAL = 5
+
+# ---- TIEMPOS ----
+SAVE_INTERVAL_PELEA = 10
+SAVE_INTERVAL_GOLPE = 2
 
 # ---- KEYPOINTS ----
 KP_CABEZA = 0
@@ -47,7 +52,7 @@ STOP_CMD = bytes.fromhex("cc 5a 01 82 02 37 b6")
 SOCKET_RCVBUF = 8 * 1024 * 1024
 
 # ============================================================
-# DECODER DRON
+# DECODER
 # ============================================================
 @dataclass
 class FrameAssembly:
@@ -153,11 +158,14 @@ class DroneVanguardIA:
         self.frame_queue = queue.Queue(maxsize=1)
         self.window_name = "VANGUARDIA UCE"
 
-        self.last_save_time = 0
-        self.historial_manos = {}
+        # Guardado
+        self.last_save_pelea = 0
+        self.last_save_golpe = 0
 
         self.output_dir = "capturas"
         os.makedirs(self.output_dir, exist_ok=True)
+
+        self.historial_manos = {}
 
         print("Cargando modelo YOLO...")
         self.model = YOLO(MODEL_PATH)
@@ -194,13 +202,13 @@ class DroneVanguardIA:
         return 0
 
     # ========================================================
-    # DETECTOR DE GOLPE REAL
+    # DETECTOR INTELIGENTE
     # ========================================================
-    def detectar_golpe(self, coords, kpts):
+    def detectar_eventos(self, coords, kpts):
         num_personas = len(coords)
 
         if num_personas < 2:
-            return False
+            return "none"
 
         for i in range(num_personas):
             for j in range(i + 1, num_personas):
@@ -214,25 +222,35 @@ class DroneVanguardIA:
                 manos_j = [(kpts[j][KP_MUÑECA_IZQ], "izq"),
                            (kpts[j][KP_MUÑECA_DER], "der")]
 
+                # 🔴 GOLPE
                 for mano, tipo in manos_i:
                     if self.punto_valido(mano) and self.punto_valido(cabeza_j):
-
                         vel = self.calcular_velocidad(i, tipo, mano)
                         dist = self.distancia(mano, cabeza_j)
 
                         if vel > VELOCIDAD_MIN_GOLPE and dist < DISTANCIA_IMPACTO:
-                            return True
+                            return "golpe"
 
                 for mano, tipo in manos_j:
                     if self.punto_valido(mano) and self.punto_valido(cabeza_i):
-
                         vel = self.calcular_velocidad(j, tipo, mano)
                         dist = self.distancia(mano, cabeza_i)
 
                         if vel > VELOCIDAD_MIN_GOLPE and dist < DISTANCIA_IMPACTO:
-                            return True
+                            return "golpe"
 
-        return False
+                # 🟡 PELEA
+                for mano, _ in manos_i:
+                    if self.punto_valido(mano) and self.punto_valido(cabeza_j):
+                        if self.distancia(mano, cabeza_j) < DISTANCIA_IMPACTO:
+                            return "pelea"
+
+                for mano, _ in manos_j:
+                    if self.punto_valido(mano) and self.punto_valido(cabeza_i):
+                        if self.distancia(mano, cabeza_i) < DISTANCIA_IMPACTO:
+                            return "pelea"
+
+        return "none"
 
     # ========================================================
     # CAPTURA
@@ -303,24 +321,37 @@ class DroneVanguardIA:
 
             for r in results:
                 annotated = r.plot()
+                evento = "none"
 
                 if r.boxes is not None and r.keypoints is not None:
                     coords = r.boxes.xyxy.cpu().numpy()
                     kpts = r.keypoints.xy.cpu().numpy()
 
-                    conflicto = self.detectar_golpe(coords, kpts)
+                    evento = self.detectar_eventos(coords, kpts)
 
-                    if conflicto:
-                        cv2.putText(annotated, "GOLPE DETECTADO",
-                                    (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
-                                    1, (0, 0, 255), 3)
+                t = time.time()
 
-                        t = time.time()
-                        if t - self.last_save_time >= SAVE_INTERVAL:
-                            filename = os.path.join(self.output_dir, f"golpe_{int(t)}.jpg")
-                            cv2.imwrite(filename, annotated)
-                            print(f"Imagen Guardada: {filename}")
-                            self.last_save_time = t
+                if evento == "golpe":
+                    cv2.putText(annotated, "GOLPE DETECTADO",
+                                (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
+                                1, (0, 0, 255), 3)
+
+                    if t - self.last_save_golpe >= SAVE_INTERVAL_GOLPE:
+                        filename = os.path.join(self.output_dir, f"golpe_{int(t)}.jpg")
+                        cv2.imwrite(filename, annotated)
+                        print(f"🚨 GOLPE guardado: {filename}")
+                        self.last_save_golpe = t
+
+                elif evento == "pelea":
+                    cv2.putText(annotated, "POSIBLE PELEA",
+                                (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
+                                1, (0, 255, 255), 2)
+
+                    if t - self.last_save_pelea >= SAVE_INTERVAL_PELEA:
+                        filename = os.path.join(self.output_dir, f"pelea_{int(t)}.jpg")
+                        cv2.imwrite(filename, annotated)
+                        print(f"⚠️ Pelea guardada: {filename}")
+                        self.last_save_pelea = t
 
                 cv2.imshow(self.window_name, annotated)
 
