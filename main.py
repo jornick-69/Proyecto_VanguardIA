@@ -12,7 +12,8 @@ from typing import Dict, Optional
 # CONFIGURACIÓN
 # ============================================================
 MODO_DRON = False  # True = Drone | False = Webcam
-MODEL_PATH = r"C:\Users\elvis\Downloads\yolo11n-pose.pt"
+#MODEL_PATH = r"C:\Users\elvis\Downloads\yolo11n-pose.pt"
+MODEL_PATH = "Modelo/yolo11n-pose.pt"
 
 print(f"Iniciando Vanguardia UCE | Modo: {'DRON' if MODO_DRON else 'WEBCAM'}")
 
