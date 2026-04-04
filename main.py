@@ -10,7 +10,7 @@ from typing import Dict, Optional
 # ============================================================
 # CONFIGURACIÓN
 # ============================================================
-MODO_DRON = True
+MODO_DRON = False
 MODEL_PATH = "Modelo/yolo11n-pose.pt"
 
 # ---- DISTANCIAS ----
