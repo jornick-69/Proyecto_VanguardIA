@@ -4,9 +4,183 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Explicar el .env en el README.md">
+    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Cambiar el título del mensaje de Telegrama a ALERTA DETECTADA">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/detection/event_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/detection/event_analyzer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/detection/event_memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/detection/event_memory.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/notification/telegram_notifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/notification/telegram_notifier.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/validation/ollama_validator.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation/ollama_validator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/validation/prompt_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation/prompt_builder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775344731.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775344781.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775344979.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775344991.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775345008.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775345016.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775345239.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775351169.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775351263.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775351410.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775351563.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775351574.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775351598.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775351606.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352502692_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352502692_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352502692_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352542274_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352542274_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352542274_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352560641_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352560641_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352560641_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352568696_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352568696_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352568696_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352576705_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352576705_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352576705_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352594979_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352594979_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352594979_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352602987_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352602987_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352602987_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352641739_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352641739_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352641739_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352649772_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352649772_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352649772_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352698329_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352698329_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352698329_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352706399_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352706399_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352706399_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352726109_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352726109_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352726109_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352799071_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352799071_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352799071_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352811912_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352811912_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352811912_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352819929_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352819929_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352819929_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352827949_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352827949_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775352827949_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408159846_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408159846_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408159846_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408483846_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408483846_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408483846_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408714286_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408714286_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408714286_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408730906_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408730906_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408730906_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408746773_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408746773_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408746773_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408755455_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408755455_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408755455_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408830642_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408830642_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775408830642_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412008651_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412008651_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412008651_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412037249_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412037249_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412037249_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412069820_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412069820_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412069820_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412204501_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412204501_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412204501_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412235739_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412235739_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412235739_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412258399_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412258399_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412258399_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412278896_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412278896_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412278896_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412284912_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412284912_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412284912_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412290931_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412290931_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412290931_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412769760_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412769760_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412769760_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412789791_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412789791_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412789791_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412855770_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412855770_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412855770_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412861803_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412861803_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412861803_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412867846_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412867846_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412867846_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412880479_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412880479_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412880479_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412887393_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412887393_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412887393_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412931566_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412931566_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412931566_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412937577_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412937577_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412937577_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412943643_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412943643_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412943643_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412949865_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412949865_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412949865_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412973140_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412973140_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412973140_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412979167_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412979167_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412979167_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412985192_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412985192_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412985192_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412991209_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412991209_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412991209_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412999995_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412999995_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775412999995_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775413031555_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775413031555_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775413031555_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775413084159_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775413084159_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775413084159_2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775413120910_0.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775413120910_1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/capturas/caido_1775413120910_2.jpg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -187,7 +361,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775425220475</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Cambiar el título del mensaje de Telegrama a ALERTA DETECTADA">
+      <option name="closed" value="true" />
+      <created>1775426236553</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1775426236553</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -213,7 +395,8 @@
     <MESSAGE value="Quitar las API KEY temporalmente" />
     <MESSAGE value="Quitar las API KEY , TOKEN y ID del .env temporalmente" />
     <MESSAGE value="Explicar el .env en el README.md" />
-    <option name="LAST_COMMIT_MESSAGE" value="Explicar el .env en el README.md" />
+    <MESSAGE value="Cambiar el título del mensaje de Telegrama a ALERTA DETECTADA" />
+    <option name="LAST_COMMIT_MESSAGE" value="Cambiar el título del mensaje de Telegrama a ALERTA DETECTADA" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -227,6 +410,6 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Proyecto_Dron$main.coverage" NAME="main Coverage Results" MODIFIED="1775425800608" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Proyecto_Dron$main.coverage" NAME="main Coverage Results" MODIFIED="1775427714715" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

@@ -56,7 +56,7 @@ class EventAnalyzer:
                 if dx > dy * 1.5:
                     x1, y1, x2, y2 = coords[i]
                     tid = int(track_ids[i]) if i < len(track_ids) else -1
-                    events.append(DetectedEvent("caído", (float(x1), float(y1), float(x2), float(y2)), {tid} if tid >= 0 else set()))
+                    events.append(DetectedEvent("caída", (float(x1), float(y1), float(x2), float(y2)), {tid} if tid >= 0 else set()))
 
         for i in range(len(coords)):
             for j in range(i + 1, len(coords)):

@@ -14,7 +14,7 @@ El evento preliminar detectado localmente es: "{evento_local}"
 
 Devuelve exactamente este esquema:
 {{
-  "evento_detectado": "pelea|caído|aglomeración|ninguno",
+  "evento_detectado": "pelea|caída|aglomeración|ninguno",
   "confianza": 0,
   "confirmado": false,
   "best_frame_index": 0,
@@ -29,6 +29,6 @@ Reglas:
 
 Criterios:
 - pelea: agresión física, forcejeo o interacción violenta visible
-- caído: persona tendida, acostada o desplomada en cualquier superficie
+- caída: persona tendida, acostada o desplomada en cualquier superficie
 - aglomeración: grupo numeroso concentrado en cercanía evidente
 """.strip()

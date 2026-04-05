@@ -42,7 +42,7 @@ class AppConfig:
 
     save_interval_pelea: int
     save_interval_golpe: int
-    save_interval_caido: int
+    save_interval_caida: int
     save_interval_aglomeracion: int
 
     kp_cabeza: int
@@ -77,7 +77,7 @@ class AppConfig:
     event_id_overlap_min: int
 
     cooldown_pelea: int
-    cooldown_caido: int
+    cooldown_caida: int
     cooldown_aglomeracion: int
 
     telegram_enabled: bool
@@ -95,7 +95,7 @@ class AppConfig:
     def cooldowns(self) -> dict[str, int]:
         return {
             "pelea": self.cooldown_pelea,
-            "caído": self.cooldown_caido,
+            "caída": self.cooldown_caida,
             "aglomeración": self.cooldown_aglomeracion,
         }
 
@@ -117,7 +117,7 @@ def load_config() -> AppConfig:
 
         save_interval_pelea=_to_int(os.getenv("SAVE_INTERVAL_PELEA"), 6),
         save_interval_golpe=_to_int(os.getenv("SAVE_INTERVAL_GOLPE"), 2),
-        save_interval_caido=_to_int(os.getenv("SAVE_INTERVAL_CAIDO"), 6),
+        save_interval_caida=_to_int(os.getenv("SAVE_INTERVAL_CAIDA"), 6),
         save_interval_aglomeracion=_to_int(os.getenv("SAVE_INTERVAL_AGLOMERACION"), 10),
 
         kp_cabeza=_to_int(os.getenv("KP_CABEZA"), 0),
@@ -152,7 +152,7 @@ def load_config() -> AppConfig:
         event_id_overlap_min=_to_int(os.getenv("EVENT_ID_OVERLAP_MIN"), 1),
 
         cooldown_pelea=_to_int(os.getenv("COOLDOWN_PELEA"), 20),
-        cooldown_caido=_to_int(os.getenv("COOLDOWN_CAIDO"), 30),
+        cooldown_caida=_to_int(os.getenv("COOLDOWN_CAIDA"), 30),
         cooldown_aglomeracion=_to_int(os.getenv("COOLDOWN_AGLOMERACION"), 40),
 
         telegram_enabled=_to_bool(os.getenv("TELEGRAM_ENABLED"), True),
