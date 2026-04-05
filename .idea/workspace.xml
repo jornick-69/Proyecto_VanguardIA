@@ -4,10 +4,38 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Redimensionar la ventana de video y los cambios con IA de detección de eventos inusuales">
+    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Implementación de modelos de IA para validar si en verdad ocurrió el evento detectado.">
+      <change afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/detection/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/detection/detector.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/detection/event_analyzer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/detection/event_memory.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/drone/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/drone/decoder.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/drone/video_source.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/notification/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/notification/telegram_notifier.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/alert_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/burst_capture_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/utils/files.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/utils/json_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/validation/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/validation/base.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/validation/factory.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/validation/gemini_validator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/validation/ollama_validator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/validation/prompt_builder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Modelo/yolo11n-pose.pt" beforeDir="false" afterPath="$PROJECT_DIR$/modelo/yolo11n-pose.pt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,28 +78,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.main.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "ai.playground.ignore.import.keys.banner.in.settings": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "master",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/Users/nicko/PycharmProjects/Proyecto Dron",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\nicko\PycharmProjects\Proyecto Dron" />
+      <recent name="C:\Users\nicko\PycharmProjects\Proyecto Dron\app" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Proyecto Dron" />
@@ -128,7 +163,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775344932794</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Implementación de modelos de IA para validar si en verdad ocurrió el evento detectado.">
+      <option name="closed" value="true" />
+      <created>1775413849204</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1775413849204</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -147,7 +190,19 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Redimensionar la ventana de video y los cambios con IA de detección de eventos inusuales" />
-    <option name="LAST_COMMIT_MESSAGE" value="Redimensionar la ventana de video y los cambios con IA de detección de eventos inusuales" />
+    <MESSAGE value="Implementación de modelos de IA para validar si en verdad ocurrió el evento detectado." />
+    <option name="LAST_COMMIT_MESSAGE" value="Implementación de modelos de IA para validar si en verdad ocurrió el evento detectado." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/app/config.py</url>
+          <line>2</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Proyecto_Dron$main.coverage" NAME="main Coverage Results" MODIFIED="1775413065398" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
