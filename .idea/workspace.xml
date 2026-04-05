@@ -4,15 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="No subir el .env">
+    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Poner tildes en &quot;caído&quot; y &quot;aglomeración&quot;">
       <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/detection/event_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/detection/event_analyzer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/detection/event_memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/detection/event_memory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/validation/ollama_validator.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation/ollama_validator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/validation/prompt_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation/prompt_builder.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,12 +24,9 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;jornick-69&quot;
-  }
-}</component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {}
+}]]></component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/jornick-69/Proyecto_VanguardIA.git&quot;,
@@ -164,7 +155,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775416285809</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Poner tildes en &quot;caído&quot; y &quot;aglomeración&quot;">
+      <option name="closed" value="true" />
+      <created>1775418473703</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1775418473703</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -186,7 +185,8 @@
     <MESSAGE value="Implementación de modelos de IA para validar si en verdad ocurrió el evento detectado." />
     <MESSAGE value="Reorganización del proyecto en clases y parametrización más manejable" />
     <MESSAGE value="No subir el .env" />
-    <option name="LAST_COMMIT_MESSAGE" value="No subir el .env" />
+    <MESSAGE value="Poner tildes en &quot;caído&quot; y &quot;aglomeración&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="Poner tildes en &quot;caído&quot; y &quot;aglomeración&quot;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
