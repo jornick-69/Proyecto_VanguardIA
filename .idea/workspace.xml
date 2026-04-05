@@ -4,9 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Reorganización del proyecto en clases y parametrización más manejable">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="No subir el .env">
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/detection/event_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/detection/event_analyzer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/detection/event_memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/detection/event_memory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/validation/ollama_validator.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation/ollama_validator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/validation/prompt_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/validation/prompt_builder.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -150,7 +156,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775415789322</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="No subir el .env">
+      <option name="closed" value="true" />
+      <created>1775416285809</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1775416285809</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -171,7 +185,8 @@
     <MESSAGE value="Redimensionar la ventana de video y los cambios con IA de detección de eventos inusuales" />
     <MESSAGE value="Implementación de modelos de IA para validar si en verdad ocurrió el evento detectado." />
     <MESSAGE value="Reorganización del proyecto en clases y parametrización más manejable" />
-    <option name="LAST_COMMIT_MESSAGE" value="Reorganización del proyecto en clases y parametrización más manejable" />
+    <MESSAGE value="No subir el .env" />
+    <option name="LAST_COMMIT_MESSAGE" value="No subir el .env" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -185,6 +200,6 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Proyecto_Dron$main.coverage" NAME="main Coverage Results" MODIFIED="1775415533081" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Proyecto_Dron$main.coverage" NAME="main Coverage Results" MODIFIED="1775416602760" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

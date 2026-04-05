@@ -95,8 +95,8 @@ class AppConfig:
     def cooldowns(self) -> dict[str, int]:
         return {
             "pelea": self.cooldown_pelea,
-            "caido": self.cooldown_caido,
-            "aglomeracion": self.cooldown_aglomeracion,
+            "caído": self.cooldown_caido,
+            "aglomeración": self.cooldown_aglomeracion,
         }
 
 

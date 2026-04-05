@@ -15,7 +15,7 @@ OLLAMA_JSON_SCHEMA = {
     "properties": {
         "evento_detectado": {
             "type": "string",
-            "enum": ["pelea", "caido", "aglomeracion", "ninguno"],
+            "enum": ["pelea", "caído", "aglomeración", "ninguno"],
         },
         "confianza": {"type": "number"},
         "confirmado": {"type": "boolean"},
