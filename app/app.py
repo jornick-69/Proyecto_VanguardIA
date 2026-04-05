@@ -43,8 +43,8 @@ class VanguardApplication:
         self.last_save_times = {
             "pelea": 0.0,
             "golpe": 0.0,
-            "caido": 0.0,
-            "aglomeracion": 0.0,
+            "caída": 0.0,
+            "aglomeración": 0.0,
         }
 
     def _adjust_to_window(self, frame):
@@ -64,8 +64,8 @@ class VanguardApplication:
     def _should_emit(self, event_type: str, now_ts: float) -> bool:
         interval_map = {
             "pelea": self.config.save_interval_pelea,
-            "caido": self.config.save_interval_caido,
-            "aglomeracion": self.config.save_interval_aglomeracion,
+            "caída": self.config.save_interval_caida,
+            "aglomeración": self.config.save_interval_aglomeracion,
         }
         return (now_ts - self.last_save_times.get(event_type, 0.0)) > interval_map[event_type]
 
@@ -79,10 +79,10 @@ class VanguardApplication:
 
         if event.tipo == "pelea":
             cv2.putText(annotated, f"PELEA [{ids_text}]", (x1, max(20, y1 - 10)), 0, 0.8, (0, 0, 255), 2)
-        elif event.tipo == "caido":
-            cv2.putText(annotated, f"PERSONA CAIDA [{ids_text}]", (x1, max(20, y1 - 10)), 0, 0.8, (255, 0, 255), 2)
-        elif event.tipo == "aglomeracion":
-            cv2.putText(annotated, "AGLOMERACION", (x1, max(20, y1 - 10)), 0, 0.8, (0, 255, 0), 2)
+        elif event.tipo == "caída":
+            cv2.putText(annotated, f"PERSONA CAÍDA [{ids_text}]", (x1, max(20, y1 - 10)), 0, 0.8, (255, 0, 255), 2)
+        elif event.tipo == "aglomeración":
+            cv2.putText(annotated, "AGLOMERACIÓN", (x1, max(20, y1 - 10)), 0, 0.8, (0, 255, 0), 2)
 
     def run(self) -> None:
         print(f"Iniciando VanguardIA | Modo: {'DRON' if self.config.modo_dron else 'WEBCAM'}")

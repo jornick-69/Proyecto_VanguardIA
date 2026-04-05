@@ -17,9 +17,9 @@ class TelegramNotifier:
 
         url = f"https://api.telegram.org/bot{self.config.telegram_bot_token}/sendPhoto"
         caption = (
-            f"🚨 <b>ALERTA VALIDADA</b>\n"
+            f"🚨 <b>ALERTA DETECTADA</b>\n"
             f"<b>Evento local:</b> {evento_local}\n"
-            f"<b>Evento confirmado:</b> {result.evento_detectado}\n"
+            #f"<b>Evento confirmado:</b> {result.evento_detectado}\n"
             f"<b>Confianza:</b> {result.confianza}%\n"
             f"<b>Proveedor:</b> Van-GuardIA\n"
             f"<b>Detalle:</b> {result.explicacion}"

@@ -9,7 +9,7 @@ Proyecto organizado en módulos para captura de video, detección, tracking, val
    ```bash
    pip install -r requirements.txt
    ```
-3. Copia `.env.example` a `.env` y llena tus valores.
+3. Crea un archivo `.env`, copia `.env.example` a `.env` y llena tus valores.
 4. Ejecuta:
    ```bash
    python main.py

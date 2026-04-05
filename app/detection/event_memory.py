@@ -9,8 +9,8 @@ from app.models import EventSignature
 class EventMemory:
     def __init__(self, config: AppConfig):
         self.config = config
-        self.last_alert_sent = {"pelea": 0.0, "caido": 0.0, "aglomeracion": 0.0}
-        self.active_events = {"pelea": [], "caido": [], "aglomeracion": []}
+        self.last_alert_sent = {"pelea": 0.0, "caída": 0.0, "aglomeración": 0.0}
+        self.active_events = {"pelea": [], "caída": [], "aglomeración": []}
 
     @staticmethod
     def bbox_to_signature(bbox, frame_shape) -> EventSignature:
