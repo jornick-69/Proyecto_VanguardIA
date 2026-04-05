@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="">
+    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Redimensionar la ventana de video y los cambios con IA de detección de eventos inusuales">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modelo/yolo11n-pose.pt" beforeDir="false" afterPath="$PROJECT_DIR$/modelo/yolo11n-pose.pt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -119,6 +120,15 @@
       <updated>1774746184325</updated>
       <workItem from="1774746185353" duration="25721000" />
     </task>
+    <task id="LOCAL-00001" summary="Redimensionar la ventana de video y los cambios con IA de detección de eventos inusuales">
+      <option name="closed" value="true" />
+      <created>1775344932794</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1775344932794</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -135,7 +145,11 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Redimensionar la ventana de video y los cambios con IA de detección de eventos inusuales" />
+    <option name="LAST_COMMIT_MESSAGE" value="Redimensionar la ventana de video y los cambios con IA de detección de eventos inusuales" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Proyecto_Dron$main.coverage" NAME="main Coverage Results" MODIFIED="1775344484674" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Proyecto_Dron$main.coverage" NAME="main Coverage Results" MODIFIED="1775413065398" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
