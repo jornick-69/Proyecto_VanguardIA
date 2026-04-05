@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Poner tildes en &quot;caído&quot; y &quot;aglomeración&quot;">
+    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Quitar las API KEY temporalmente">
       <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,7 +162,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775418473703</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Quitar las API KEY temporalmente">
+      <option name="closed" value="true" />
+      <created>1775419318009</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1775419318009</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -186,7 +193,8 @@
     <MESSAGE value="Reorganización del proyecto en clases y parametrización más manejable" />
     <MESSAGE value="No subir el .env" />
     <MESSAGE value="Poner tildes en &quot;caído&quot; y &quot;aglomeración&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="Poner tildes en &quot;caído&quot; y &quot;aglomeración&quot;" />
+    <MESSAGE value="Quitar las API KEY temporalmente" />
+    <option name="LAST_COMMIT_MESSAGE" value="Quitar las API KEY temporalmente" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
