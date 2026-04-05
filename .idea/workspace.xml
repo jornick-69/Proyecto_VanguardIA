@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Quitar las API KEY , TOKEN y ID del .env temporalmente">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+    <list default="true" id="d5970b47-8d47-40f5-a065-76215829e869" name="Changes" comment="Explicar el .env en el README.md">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/notification/telegram_notifier.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/notification/telegram_notifier.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +57,7 @@
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "ai.playground.ignore.import.keys.banner.in.settings": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "rama-nico",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "C:/Users/nicko/PycharmProjects/Proyecto Dron",
     "node.js.detected.package.eslint": "true",
@@ -180,7 +179,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775419641535</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Explicar el .env en el README.md">
+      <option name="closed" value="true" />
+      <created>1775425220475</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1775425220475</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,7 +212,8 @@
     <MESSAGE value="Poner tildes en &quot;caído&quot; y &quot;aglomeración&quot;" />
     <MESSAGE value="Quitar las API KEY temporalmente" />
     <MESSAGE value="Quitar las API KEY , TOKEN y ID del .env temporalmente" />
-    <option name="LAST_COMMIT_MESSAGE" value="Quitar las API KEY , TOKEN y ID del .env temporalmente" />
+    <MESSAGE value="Explicar el .env en el README.md" />
+    <option name="LAST_COMMIT_MESSAGE" value="Explicar el .env en el README.md" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -219,6 +227,6 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Proyecto_Dron$main.coverage" NAME="main Coverage Results" MODIFIED="1775424776228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Proyecto_Dron$main.coverage" NAME="main Coverage Results" MODIFIED="1775425800608" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
